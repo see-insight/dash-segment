@@ -25,6 +25,3 @@ Open a web browser on your machine and navigate to the following localhost URL:
 
 	http://127.0.0.1:8050/
 
-
-
-
