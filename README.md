@@ -1,6 +1,6 @@
 # dash-segment
 
-Repository for building a Image annotation Graphical User Interface using Dash.  This interface is starting fromt he segmentation example provided by plotly (makers of Dash). 
+Repository for building a Image annotation Graphical User Interface using Dash.  This interface is starting from the segmentation example provided by plotly (makers of Dash). 
 
 
 ## Installation Instructions
