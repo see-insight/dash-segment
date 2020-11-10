@@ -3,6 +3,7 @@ import json
 from skimage import io, data
 from PIL import Image
 
+#from see import GeneticSearch
 
 import dash_canvas
 import dash
@@ -12,8 +13,8 @@ import dash_core_components as dcc
 import plotly.graph_objs as go
 from dash.exceptions import PreventUpdate
 
-from dash_canvas.utils import  (parse_jsonstring, segmentation_generic,
-                               image_with_contour, image_string_to_PILImage)
+from utils import (parse_jsonstring, segmentation_generic,
+                   image_with_contour, image_string_to_PILImage)
 from dash_canvas.components import image_upload_zone
 
 # Image to segment and shape parameters
@@ -71,6 +72,15 @@ app.layout = html.Div([
                                  src='assets/segmentation.gif',
                                  width='100%'),
                      ]
+                ),
+                dcc.Tab(
+                     label='Dirk Was Here',
+                     value='dirk-segmentation-help-tab',
+                     children=[
+                        html.Img(id='dirk-help',
+                                 src='assets/segmentation.gif',
+                                 width='100%'),
+                     ]
                 )
         ]
         ),
@@ -123,6 +133,9 @@ def update_figure_upload(string, image, algorithm):
             im = np.asarray(im)
         shape = im.shape[:2]
         mask = parse_jsonstring(string, shape=shape)
+        print("DIRK WAS HERE")
+        # skimage.io.imsave("medial.png", img_as_uint(imgSk))
+        io.imsave("test.jpg", mask)
         if mask.sum() > 0:
             seg = segmentation_generic(im, mask, mode=algorithm)
         else:
@@ -136,10 +149,10 @@ def update_figure_upload(string, image, algorithm):
             [Input('upload-image', 'contents')])
 def update_canvas_upload(image_string):
     # The line below causes NoneType Error
-    # print("uploading", image_string[:100])
     if image_string is None:
         raise PreventUpdate
     else:
+        print("uploading", image_string[:100])
         return image_string
 
 

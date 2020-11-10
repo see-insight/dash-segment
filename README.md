@@ -25,3 +25,12 @@ Open a web browser on your machine and navigate to the following localhost URL:
 
 	http://127.0.0.1:8050/
 
+When you are done use "ctrl-c" to cancel the dash server and the following command to deactivate the conda environment:
+
+```conda deactivate```
+
+That should be it!
+
+
+
+
