@@ -3,7 +3,9 @@ import json
 from skimage import io, data
 from PIL import Image
 
-#from see import GeneticSearch
+from see import GeneticSearch
+
+print(dir(GeneticSearch))
 
 import dash_canvas
 import dash

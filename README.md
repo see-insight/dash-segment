@@ -31,6 +31,15 @@ When you are done use "ctrl-c" to cancel the dash server and the following comma
 
 That should be it!
 
+---
+
+# Steps to get see working for development
+
+1. git clone git@github.com:see-insight/see-segment.git
+2. cp -r see-segment/see .
+3. rm -rf see-segment
+
+
 
 
 
