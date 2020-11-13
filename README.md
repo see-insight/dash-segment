@@ -7,7 +7,7 @@ Repository for building a Image annotation Graphical User Interface using Dash. 
 
 After cloning this repository, open a terminal in the main folder and create a local conda environment (with pip installed) named 'envs' using the following command:
 
-```conda create --prefix ./envs pip```
+```conda create --prefix ./envs python=3.7```
 
 Activate this new environment using the following command:
 

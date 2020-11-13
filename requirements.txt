@@ -10,3 +10,4 @@ scikit-learn
 pandas
 numpy
 Pillow
+git+https://github.com/colbrydi/see-segment.git
