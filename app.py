@@ -19,7 +19,8 @@ from utils import (parse_jsonstring, segmentation_generic,
 from dash_canvas.components import image_upload_zone
 
 # Image to segment and shape parameters
-filename = 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Mitochondria%2C_mammalian_lung_-_TEM_%282%29.jpg'
+# filename = 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Mitochondria%2C_mammalian_lung_-_TEM_%282%29.jpg'
+filename = "assets/Snail.jpg"
 try:
     img = io.imread(filename, as_gray=True)
 except:
@@ -56,6 +57,14 @@ app.layout = html.Div([
 
                 ]),
                 dcc.Tab(
+                    label='Ground Truth Image',
+                    value='ground-truth-tab',
+                    children=[
+                        html.Img(id='ground-truth',
+                                 src='assets/Snail_GT.jpg',
+                                 width='100%'),
+                    ]),
+                dcc.Tab(
                     label='Segmentation result',
                     value='segmentation-result-tab',
                     children=[
@@ -73,17 +82,8 @@ app.layout = html.Div([
                                  src='assets/segmentation.gif',
                                  width='100%'),
                      ]
-                ),
-                dcc.Tab(
-                     label='Dirk Was Here',
-                     value='dirk-segmentation-help-tab',
-                     children=[
-                        html.Img(id='dirk-help',
-                                 src='assets/segmentation.gif',
-                                 width='100%'),
-                     ]
                 )
-        ]
+            ]
         ),
     ], className="seven columns"),
     html.Div([
@@ -97,14 +97,14 @@ app.layout = html.Div([
                     'border':'solid 1px black',
                     'float':'left'}
                     ),
-        html.H2(children='Segmentation tool'),
+        html.H2(children='SEE-Segment Annotation tool'),
         dcc.Markdown('''
                 Draw on the picture to annotate each object
                 you want to segment, then press the "Segmentation"
                 button to trigger the segmentation.
             '''),
         html.Br(),
-        html.Label('Segmentation alorithm'),
+        html.Label('Segmentation algorithm'),
         dcc.Dropdown(
             id='algorithm',
             options=[
