@@ -61,7 +61,7 @@ app.layout = html.Div([
                     value='ground-truth-tab',
                     children=[
                         html.Img(id='ground-truth',
-                                 src='assets/Snail_GT.jpg',
+                                 src='./assets/Snail_GT.jpg',
                                  width='100%'),
                     ]),
                 dcc.Tab(
@@ -130,17 +130,25 @@ def update_figure_upload(string, image, algorithm):
             im = img
             image = img
         else:
+            print("Before PILImage")
             im = image_string_to_PILImage(image)
             im = np.asarray(im)
+            print("After PILImage")
         shape = im.shape[:2]
+        print(f"Before jsonstring - Dirk was here {len(string)}")
         mask = parse_jsonstring(string, shape=shape)
         print("DIRK WAS HERE")
         # skimage.io.imsave("medial.png", img_as_uint(imgSk))
-        io.imsave("test.jpg", mask)
-        if mask.sum() > 0:
-            seg = segmentation_generic(im, mask, mode=algorithm)
-        else:
-            seg = np.zeros(shape)
+        io.imsave("./assets/Snail_GT.jpg", mask)
+        
+        #import subprocess
+#         if mask.sum() > 0:
+#              command1 = subprocess.Popen(['python rungeneticsearch.py', './assets/Snail.jpg', './assets/Snail_GT.jpg'])
+
+#             seg = segmentation_generic(im, mask, mode=algorithm)
+#         else:
+        seg = np.zeros(shape)
+            
         return image_with_contour(im, seg, shape=shape)
     else:
         raise PreventUpdate
