@@ -18,9 +18,13 @@ from utils import (parse_jsonstring, segmentation_generic,
                    image_with_contour, image_string_to_PILImage)
 from dash_canvas.components import image_upload_zone
 
+import subprocess
+
+import shutil 
+
 # Image to segment and shape parameters
 # filename = 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Mitochondria%2C_mammalian_lung_-_TEM_%282%29.jpg'
-filename = "assets/Snail.jpg"
+filename = "assets/Snail_resize.jpg"
 try:
     img = io.imread(filename, as_gray=True)
 except:
@@ -61,7 +65,7 @@ app.layout = html.Div([
                     value='ground-truth-tab',
                     children=[
                         html.Img(id='ground-truth',
-                                 src='./assets/Snail_GT.jpg',
+                                 src='assets/Snailcpy_GT.jpg',
                                  width='100%'),
                     ]),
                 dcc.Tab(
@@ -118,7 +122,6 @@ app.layout = html.Div([
     className="row")
 
 
-
 @app.callback(Output('segmentation', 'figure'),
             [Input('canvas', 'json_data')],
             [State('canvas', 'image_content'),
@@ -130,29 +133,45 @@ def update_figure_upload(string, image, algorithm):
             im = img
             image = img
         else:
-            print("Before PILImage")
+            #print("Before PILImage")
             im = image_string_to_PILImage(image)
             im = np.asarray(im)
-            print("After PILImage")
+            #print("After PILImage")
         shape = im.shape[:2]
-        print(f"Before jsonstring - Dirk was here {len(string)}")
+        #print(f"Before jsonstring - Dirk was here {len(string)}")
         mask = parse_jsonstring(string, shape=shape)
-        print("DIRK WAS HERE")
-        # skimage.io.imsave("medial.png", img_as_uint(imgSk))
-        io.imsave("./assets/Snail_GT.jpg", mask)
+        #print("DIRK WAS HERE")
+        #skimage.io.imsave("medial.png", img_as_uint(imgSk))
+  
+        io.imsave("Snail_GT.jpg", mask)
+        file_copy("Snail_GT.jpg", "assets/Snailcpy_GT.jpg")
+
+        #file_copy function can be removed, the code below can be called----
+        #shutil.copyfile("Snail_GT.jpg", "assets/Snailcopy1_GT.jpg") 
+      
         
         #import subprocess
-#         if mask.sum() > 0:
-#              command1 = subprocess.Popen(['python rungeneticsearch.py', './assets/Snail.jpg', './assets/Snail_GT.jpg'])
+        if mask.sum() > 0:
+        	#ERRORS- 
+        		#CommandNotFound Error Message: Your shell has not been properly configured to use 'conda activate'
+        		#FileNotFound: python: can't open file 'GeneticSearch.py': [Errno 2] No such file or directory
 
-#             seg = segmentation_generic(im, mask, mode=algorithm)
-#         else:
-        seg = np.zeros(shape)
-            
+            #command1 = subprocess.Popen(['python GeneticSearch.py', './assets/Snail.jpg', './assets/Snail_GT.jpg'])
+            #command1 = subprocess.Popen(['bash -c "conda activate root; python GeneticSearch.py"', './assets/Snail_resize.jpg', './assets/Snail_GT.jpg'], shell=True)
+            #subprocess.Popen(['conda run -n env; python GeneticSearch.py', './assets/Snail_resize.jpg', './assets/Snail_GT.jpg'], shell=True)
+            seg = segmentation_generic(im, mask, mode=algorithm)
+        else:
+        	seg = np.zeros(shape)
+        
         return image_with_contour(im, seg, shape=shape)
     else:
         raise PreventUpdate
 
+#This function can be removed and shutil.copfile() can be used in the update_figure_upload function
+def file_copy(src, dest):
+	#Copy the source to destination
+	shutil.copyfile(src, dest) #Update dest filename after each segmentation
+	return
 
 @app.callback(Output('canvas', 'image_content'),
             [Input('upload-image', 'contents')])

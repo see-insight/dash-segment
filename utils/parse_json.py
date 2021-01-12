@@ -68,7 +68,7 @@ def parse_jsonstring(string, shape=None, scale=1):
         return mask
     scale = 1
     
-    print(f"There are {len(data['objects'])} in this json file")
+    #print(f"There are {len(data['objects'])} in this json file")
     for obj in data['objects']:
         if obj['type'] == 'image':
             scale = obj['scaleX']
