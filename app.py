@@ -15,7 +15,7 @@ import plotly.graph_objs as go
 from dash.exceptions import PreventUpdate
 
 from utils import (parse_jsonstring, segmentation_generic,
-                   image_with_contour, image_string_to_PILImage)
+                   image_with_contour, image_without_contour, image_string_to_PILImage)
 from dash_canvas.components import image_upload_zone
 
 import subprocess
@@ -64,9 +64,15 @@ app.layout = html.Div([
                     label='Ground Truth Image',
                     value='ground-truth-tab',
                     children=[
-                        html.Img(id='ground-truth',
-                                 src='assets/Snailcpy_GT.jpg',
-                                 width='100%'),
+                       dcc.Graph(
+                       id='ground-truth',
+                       figure=image_without_contour('assets/Snailcpy4_GT.jpg',
+                                                    img > 0, shape=(height, width))
+                       )
+                       #html.Img(id='ground-truth',
+                        #        src=image_without_contour(np.ones_like('assets/Snailcpy4_GT.jpg'),
+                          #                                   img > 0, shape=(height, width)),
+                         #       width='100%'),
                     ]),
                 dcc.Tab(
                     label='Segmentation result',
@@ -144,7 +150,7 @@ def update_figure_upload(string, image, algorithm):
         #skimage.io.imsave("medial.png", img_as_uint(imgSk))
   
         io.imsave("Snail_GT.jpg", mask)
-        file_copy("Snail_GT.jpg", "assets/Snailcpy_GT.jpg")
+        file_copy("Snail_GT.jpg", "assets/Snailcpy4_GT.jpg")
 
         #file_copy function can be removed, the code below can be called----
         #shutil.copyfile("Snail_GT.jpg", "assets/Snailcopy1_GT.jpg") 

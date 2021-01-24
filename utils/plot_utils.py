@@ -72,10 +72,72 @@ def image_with_contour(img, labels, mode='lines', shape=None):
     fig = go.Figure(data=[cont], layout=layout)
     return fig
 
+def image_without_contour(img, labels, mode='GT', shape=None):
+    """
+    Figure without contour plot of labels superimposed on background image.
+
+    Parameters
+    ----------
+
+    img : URL, dataURI or ndarray
+        Background image. If a numpy array, it is transformed into a PIL
+        Image object.
+    labels : 2D ndarray
+        Contours are the isolines of labels.
+    shape: tuple, optional
+        Shape of the arrays, to be provided if ``img`` is not a numpy array.
+    """
+    try:
+        sh_y, sh_x = shape if shape is not None else img.shape
+    except AttributeError:
+        print('''the shape of the image must be provided with the
+                 ``shape`` parameter if ``img`` is not a numpy array''')
+    if type(img) == np.ndarray:
+        img = img_as_ubyte(color.gray2rgb(img))
+        img = PIL.Image.fromarray(img)
+    labels = labels.astype(np.float)
+    custom_viridis = colors.PLOTLY_SCALES['Viridis']
+    custom_viridis.insert(0, [0, '#FFFFFF'])
+    custom_viridis[1][0] = 1.e-4
+
+    print('mode is', mode)
+        # Layout
+    layout= go.Layout(
+            images = [dict(
+                  source=img,
+                  xref="x",
+                  yref="y",
+                  x=0,
+                  y=sh_y,
+                  sizex=sh_x,
+                  sizey=sh_y,
+                  sizing="contain",
+                  layer="below")],
+            xaxis=dict(
+                  showgrid=False,
+                  zeroline=False,
+                  showline=False,
+                  ticks='',
+                  showticklabels=False,
+                  ),
+            yaxis=dict(
+                  showgrid=False,
+                  zeroline=False,
+                  showline=False,
+                  scaleanchor="x",
+                  ticks='',
+                  showticklabels=False,),
+            margin=dict(b=5, t=20))
+    fig2 = go.Figure(data=None, layout=layout)
+    return fig2
 
 if __name__ == '__main__':
     from skimage import data
     import plotly.plotly as py
     camera = data.camera()
+    camera2 = data.camera2()
     fig = image_with_contour(camera, camera > 150)
+    fig2 = image_without_contour(camera2, camera2 > 150)
     py.iplot(fig)
+    py.iplot(fig2)
+    
