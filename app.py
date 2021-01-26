@@ -5,6 +5,7 @@ from PIL import Image
 
 from see import GeneticSearch
 
+from jupyter_dash import JupyterDash
 
 import dash_canvas
 import dash
@@ -31,7 +32,7 @@ canvas_height = round(height * canvas_width / width)
 scale = canvas_width / width
 
 
-app = dash.Dash(__name__)
+app = JupyterDash(__name__)
 server = app.server
 app.config.suppress_callback_exceptions = True
 
