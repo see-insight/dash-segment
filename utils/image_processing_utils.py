@@ -5,6 +5,10 @@ from scipy import ndimage
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 
+from PIL import Image
+from see import GeneticSearch
+import subprocess
+
 # ------------------- Modification of segmentation ----------------------
 
 def _split_labels(labels, mask, img, erosion_width=10, compactness=0):
@@ -122,6 +126,13 @@ def modify_segmentation(labels, mask, img=None, mode='split'):
 
 
 # ------------- Segmentation from markers ----------------------------
+def genetic_search(img, mask):
+    """
+    """
+    
+    output = subprocess.Popen(['conda run -n env; python GeneticSearch.py', img, mask])
+    print(type(output))
+    return output
 
 def watershed_segmentation(img, mask, sigma=4):
     """
@@ -265,6 +276,13 @@ def segmentation_generic(img, mask, mode='watershed'):
         return random_walker_segmentation(img, mask)
     elif mode=='random_forest':
         return random_forest_segmentation(img, mask)
+    elif mode=='genetic_search':
+        im = Image.fromarray(img)
+        im.save("img.jpg")
+        
+        im_mask = Image.fromarray(mask)
+        im_mask.save("mask.jpg")
+        return genetic_search("img.jpg", "mask.jpg")
     else:
         raise NotImplementedError
 

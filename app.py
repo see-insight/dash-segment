@@ -60,20 +60,17 @@ app.layout = html.Div([
                         image_upload_zone('upload-image'),
 
                 ]),
-                dcc.Tab(
-                    label='Ground Truth Image',
-                    value='ground-truth-tab',
-                    children=[
-                       dcc.Graph(
-                       id='ground-truth',
-                       figure=image_without_contour('assets/Snailcpy4_GT.jpg',
-                                                    img > 0, shape=(height, width))
-                       )
-                       #html.Img(id='ground-truth',
-                        #        src=image_without_contour(np.ones_like('assets/Snailcpy4_GT.jpg'),
-                          #                                   img > 0, shape=(height, width)),
-                         #       width='100%'),
-                    ]),
+                #dcc.Tab(
+                   # label='Ground Truth Image',
+                    #value='ground-truth-tab',
+                    #children=[
+                     #  dcc.Graph(
+                      # id='ground-truth',
+                       #figure=image_with_contour('assets/Snailcpy_GT.jpg',
+                        #                            img > 0, shape=(height, width))
+                       #)
+
+                    #]),
                 dcc.Tab(
                     label='Segmentation result',
                     value='segmentation-result-tab',
@@ -82,7 +79,12 @@ app.layout = html.Div([
                         id='segmentation',
                         figure=image_with_contour(np.ones_like(img),
                                     img > 0, shape=(height, width))
-                        )
+                        ),
+                      # dcc.Graph(
+                       #id='ground-truth2',
+                       #figure=image_with_contour('assets/Snailcpy_GT.jpg',
+                        #                            img > 0, shape=(height, width))
+                       #)
                     ]),
                 dcc.Tab(
                      label='How to use this app',
@@ -119,6 +121,7 @@ app.layout = html.Div([
             id='algorithm',
             options=[
                     {'label': 'Watershed', 'value': 'watershed'},
+                    {'label': 'GeneticSearch', 'value': 'genetic_search'},
                     {'label': 'Random Walker', 'value': 'random_walker'},
                     {'label': 'Random Forest', 'value': 'random_forest'}
                 ],
@@ -150,7 +153,7 @@ def update_figure_upload(string, image, algorithm):
         #skimage.io.imsave("medial.png", img_as_uint(imgSk))
   
         io.imsave("Snail_GT.jpg", mask)
-        file_copy("Snail_GT.jpg", "assets/Snailcpy4_GT.jpg")
+        #file_copy("Snail_GT.jpg", "assets/Snailcpy_GT.jpg")
 
         #file_copy function can be removed, the code below can be called----
         #shutil.copyfile("Snail_GT.jpg", "assets/Snailcopy1_GT.jpg") 
@@ -158,14 +161,9 @@ def update_figure_upload(string, image, algorithm):
         
         #import subprocess
         if mask.sum() > 0:
-        	#ERRORS- 
-        		#CommandNotFound Error Message: Your shell has not been properly configured to use 'conda activate'
-        		#FileNotFound: python: can't open file 'GeneticSearch.py': [Errno 2] No such file or directory
 
-            #command1 = subprocess.Popen(['python GeneticSearch.py', './assets/Snail.jpg', './assets/Snail_GT.jpg'])
-            #command1 = subprocess.Popen(['bash -c "conda activate root; python GeneticSearch.py"', './assets/Snail_resize.jpg', './assets/Snail_GT.jpg'], shell=True)
-            #subprocess.Popen(['conda run -n env; python GeneticSearch.py', './assets/Snail_resize.jpg', './assets/Snail_GT.jpg'], shell=True)
             seg = segmentation_generic(im, mask, mode=algorithm)
+            
         else:
         	seg = np.zeros(shape)
         
@@ -173,19 +171,20 @@ def update_figure_upload(string, image, algorithm):
     else:
         raise PreventUpdate
 
+
 #This function can be removed and shutil.copfile() can be used in the update_figure_upload function
 def file_copy(src, dest):
 	#Copy the source to destination
 	shutil.copyfile(src, dest) #Update dest filename after each segmentation
 	return
-
+    
 @app.callback(Output('canvas', 'image_content'),
             [Input('upload-image', 'contents')])
 def update_canvas_upload(image_string):
     # The line below causes NoneType Error
     if image_string is None:
         raise PreventUpdate
-    else:
+    else:        
         print("uploading", image_string[:100])
         return image_string
 
@@ -196,6 +195,7 @@ def change_focus(string):
     if string:
         return 'segmentation-result-tab'
     return 'segmentation-canvas-tab'
+
 
 
 if __name__ == '__main__':
