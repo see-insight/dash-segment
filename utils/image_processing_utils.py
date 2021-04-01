@@ -126,12 +126,22 @@ def modify_segmentation(labels, mask, img=None, mode='split'):
 
 
 # ------------- Segmentation from markers ----------------------------
-def genetic_search(img, mask):
+def genetic_search(img, mask): 
     """
-    """
+    Genetic Search Algorithm
+    Subprocess of see-segment
     
-    output = subprocess.Popen(['conda run -n env; python GeneticSearch.py', img, mask])
-    print(type(output))
+    Parameters
+    ----------
+    img : ndarray converted to PIL Image (conversion made in Segmentation_Generic Function)
+        image to be segmented
+        
+    mask : ndarry of ints converted to PIL Image
+  
+    """
+        # ls and pwd added to test
+    output = subprocess.Popen(f'conda run -n env; ls; pwd ;seesearch {img}{mask}')
+    print(output)
     return output
 
 def watershed_segmentation(img, mask, sigma=4):
@@ -277,11 +287,11 @@ def segmentation_generic(img, mask, mode='watershed'):
     elif mode=='random_forest':
         return random_forest_segmentation(img, mask)
     elif mode=='genetic_search':
-        im = Image.fromarray(img)
-        im.save("img.jpg")
+        im = Image.fromarray(img) #trying to convert ndarray image to actual image
+        im.save("img.jpg") #this works
         
-        im_mask = Image.fromarray(mask)
-        im_mask.save("mask.jpg")
+        im_mask = Image.fromarray(mask) #trying to convery ndarry image to actual image
+        im_mask.save("mask.jpg") #this works
         return genetic_search("img.jpg", "mask.jpg")
     else:
         raise NotImplementedError

@@ -1,0 +1,144 @@
+"""This runs unit tests for functions that can be found in Segmentors.py."""
+import sys
+import pytest
+import numpy as np
+from skimage import segmentation, color
+from see import Segmentors
+from see import Segment_Similarity_Measure as SSM
+
+# Define toy rgb and grayscale images used for testing below
+TEST_IM_COLOR = np.zeros((20, 20, 3))
+TEST_IM_COLOR[4:10, 4:10, :] = 1
+TEST_IM_GRAY = TEST_IM_COLOR[:, :, 0]
+
+def test_runAlgo():
+    """Unit test for runAlgo function.
+     Checks to see if the output is what it's supposed to be in this case."""
+    individual = ['FB', 0, 0, 984, 0.09, 92, 0, 0, 0, 0, 0, 0, 0, 0, 0,\
+     (1, 2), 0, "checkerboard", "checkerboard", 0, 0, 0, 0, 0, 0]
+    Segmentors.runAlgo(TEST_IM_COLOR, TEST_IM_COLOR[:, :, 0], individual)
+
+def test_parameters():
+    """Unit test for parameters function. Checks formatting of parameter."""
+    param = Segmentors.parameters()
+    assert param.printparam('min_size') ==\
+     "min_size=0.0\n\tparameter for felzenszwalb\n\t[i for i in range(0,10000)]\n"
+
+def test_Felzenszwalb():
+    """Unit test for Felzenszwalb method. Checks if evaluate function output\
+     is the same as manually running the skimage function."""
+    fb1 = Segmentors.Felzenszwalb()
+    assert fb1.evaluate(TEST_IM_COLOR).all() == segmentation.felzenszwalb(\
+            TEST_IM_COLOR, 984, 0.09, 92, multichannel=True).all()
+    assert fb1.evaluate(TEST_IM_GRAY).all() == segmentation.felzenszwalb(\
+            TEST_IM_GRAY, 984, 0.09, 92, multichannel=False).all()
+
+def test_Slic():
+    """Unit test for Slic method. Checks if evaluate function output\
+     is the same as manually running the skimage function."""
+    sc1 = Segmentors.Slic()
+    assert sc1.evaluate(TEST_IM_COLOR).all() == segmentation.slic(\
+                TEST_IM_COLOR, n_segments=5, compactness=5, max_iter=3, \
+                sigma=5, convert2lab=True, multichannel=True).all()
+    assert sc1.evaluate(TEST_IM_GRAY).all() == segmentation.slic(\
+                TEST_IM_GRAY, n_segments=5, compactness=5, max_iter=3, \
+                sigma=5, convert2lab=True, multichannel=False).all()
+
+def test_QuickShift():
+    """Unit test for QuickShift method. Checks if evaluate function output\
+     is the same as manually running the skimage function."""
+    qs1 = Segmentors.QuickShift()
+    assert qs1.evaluate(TEST_IM_COLOR).all() == segmentation.quickshift(\
+                TEST_IM_COLOR, ratio=2, kernel_size=5, max_dist=60, sigma=5, random_seed=1).all()
+    assert qs1.evaluate(TEST_IM_GRAY).all() == segmentation.quickshift(color.gray2rgb(\
+                TEST_IM_GRAY), ratio=2, kernel_size=5, max_dist=60, sigma=5, random_seed=1).all()
+
+def test_Watershed():
+    """Unit test for Watershed method. Checks if evaluate function output\
+     is the same as manually running the skimage function."""
+    ws1 = Segmentors.Watershed()
+    assert ws1.evaluate(TEST_IM_COLOR).all() == segmentation.watershed(\
+                TEST_IM_COLOR, markers=None, compactness=2.0).all()
+
+def test_Chan_Vese():
+    """Unit test for Chan_Vese method. Checks if evaluate function output\
+     is the same as manually running the skimage function."""
+    cv1 = Segmentors.Chan_Vese()
+    assert cv1.evaluate(TEST_IM_COLOR).all() == segmentation.chan_vese(\
+                color.rgb2gray(TEST_IM_COLOR), mu=2.0, lambda1=10, \
+                lambda2=20, tol=0.001, max_iter=10, dt=0.10).all()
+    assert cv1.evaluate(TEST_IM_GRAY).all() == segmentation.chan_vese(\
+                TEST_IM_GRAY, mu=2.0, lambda1=10, \
+                lambda2=20, tol=0.001, max_iter=10, dt=0.10).all()
+
+
+def test_Morphological_Chan_Vese():
+    """Unit test for Morphological_Chan_Vese method. Checks if evaluate function output\
+     is the same as manually running the skimage function."""
+    mcv1 = Segmentors.Morphological_Chan_Vese()
+    assert mcv1.evaluate(TEST_IM_COLOR).all() == segmentation.morphological_chan_vese(\
+                color.rgb2gray(TEST_IM_COLOR), iterations=10, init_level_set="checkerboard", \
+                smoothing=10, lambda1=10, lambda2=20).all()
+    assert mcv1.evaluate(TEST_IM_GRAY).all() == segmentation.morphological_chan_vese(\
+                TEST_IM_GRAY, iterations=10, init_level_set="checkerboard", \
+                smoothing=10, lambda1=10, lambda2=20).all()
+
+def test_MorphGeodesicActiveContour():
+    """Unit test for MorphGeodesicActiveContour method. Checks if evaluate function output\
+     is the same as manually running the skimage function."""
+    ac1 = Segmentors.MorphGeodesicActiveContour()
+    assert ac1.evaluate(TEST_IM_COLOR).all() == segmentation.morphological_geodesic_active_contour(\
+                segmentation.inverse_gaussian_gradient(color.rgb2gray(TEST_IM_COLOR), 0.2, 0.3),\
+                iterations=10, init_level_set='checkerboard', smoothing=5, threshold='auto',\
+                balloon=10).all()
+    assert ac1.evaluate(TEST_IM_GRAY).all() == segmentation.morphological_geodesic_active_contour(\
+                segmentation.inverse_gaussian_gradient(TEST_IM_GRAY, 0.2, 0.3), iterations=10,\
+                init_level_set='checkerboard', smoothing=5, threshold='auto', balloon=10).all()
+
+def test_countMatches():
+    """Unit test for countMatches function. Checks output is as
+     expected for a variety of extreme cases."""
+    # create test image
+    ground_truth = np.zeros((20, 20))
+    ground_truth[4:10, 4:10] = 1
+    inferred = np.zeros((20, 20))
+    inferred[4:10, 4:6] = 1
+    inferred[4:10, 6:10] = 2
+    assert SSM.countMatches(inferred, ground_truth) ==\
+     ({0.0: {0.0: 364}, 1.0: {1.0: 12}, 2.0: {1.0: 24}}, 3, 2)
+
+    inferred = np.zeros((20, 20))
+    inferred[4:10, 3:6] = 1
+    inferred[4:10, 6:10] = 2
+    assert SSM.countMatches(inferred, ground_truth) ==\
+     ({0.0: {0.0: 358}, 1.0: {0.0: 6, 1.0: 12}, 2.0: {1.0: 24}}, 3, 2)
+
+    inferred = np.zeros((20, 20))
+    inferred[4:10, 3:6] = 1
+    inferred[4:10, 6:10] = 2
+    inferred[3:5, 3:6] = 3
+    assert SSM.countMatches(inferred, ground_truth) ==\
+     ({0.0: {0.0: 355}, 3.0: {0.0: 4, 1.0: 2}, 2.0: {1.0: 24}, 1.0: {0.0: 5, 1.0: 10}}, 4, 2)
+
+    inferred = np.zeros((20, 20))
+    assert SSM.countMatches(inferred, ground_truth) == ({0.0: {0.0: 364, 1.0: 36}}, 1, 2)
+
+    inferred = np.zeros((20, 20))
+    inferred[1:19, 1:19] = 1
+    assert SSM.countMatches(inferred, ground_truth) ==\
+     ({0.0: {0.0: 76}, 1.0: {0.0: 288, 1.0: 36}}, 2, 2)
+
+def test_countsets():
+    """Unit test for countsets function. Checks output is as
+     expected for a variety of extreme cases."""
+    assert SSM.countsets({0.0: {0.0: 364}, 1.0: {1.0: 12}, 2.0: {1.0: 24}}) ==\
+     (0, 2, {0.0: 0.0, 1.0: 1.0, 2.0: 1.0})
+    assert SSM.countsets({0.0: {0.0: 358}, 1.0: {0.0: 6, 1.0: 12}, 2.0: {1.0: 24}}) ==\
+     (6, 2, {0.0: 0.0, 1.0: 1.0, 2.0: 1.0})
+    assert SSM.countsets({0.0: {0.0: 355}, 3.0: {0.0: 4, 1.0: 2}, 2.0: {1.0: 24},\
+     1.0: {0.0: 5, 1.0: 10}}) == (7, 2, {0.0: 0.0, 3.0: 0.0, 2.0: 1.0, 1.0: 1.0})
+    assert SSM.countsets({0.0: {0.0: 364, 1.0: 36}}) ==\
+     (36, 1, {0.0: 0.0})
+    assert SSM.countsets({0.0: {0.0: 76}, 1.0: {0.0: 288, 1.0: 36}}) ==\
+     (36, 1, {0.0: 0.0, 1.0: 0.0})
+
