@@ -135,12 +135,14 @@ app.layout = html.Div([
             [Input('canvas', 'json_data')],
             [State('canvas', 'image_content'),
             State('algorithm', 'value')])
-def update_figure_upload(string, image, algorithm):
+#create button to read current directory, if mask file exists in current dir, read it and display results
+def update_figure_upload(string, image, algorithm): 
     print("update figure")
     if string:
         if image is None:
             im = img
             image = img
+        # if seg exists calculate mask
         else:
             #print("Before PILImage")
             im = image_string_to_PILImage(image)
@@ -153,13 +155,7 @@ def update_figure_upload(string, image, algorithm):
         #skimage.io.imsave("medial.png", img_as_uint(imgSk))
   
         io.imsave("Snail_GT.jpg", mask)
-        #file_copy("Snail_GT.jpg", "assets/Snailcpy_GT.jpg")
 
-        #file_copy function can be removed, the code below can be called----
-        #shutil.copyfile("Snail_GT.jpg", "assets/Snailcopy1_GT.jpg") 
-      
-        
-        #import subprocess
         if mask.sum() > 0:
 
             seg = segmentation_generic(im, mask, mode=algorithm)

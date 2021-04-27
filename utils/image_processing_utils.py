@@ -6,7 +6,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 
 from PIL import Image
-from see import GeneticSearch
+from see import GeneticSearch, Segmentors
 import subprocess
 
 # ------------------- Modification of segmentation ----------------------
@@ -140,9 +140,41 @@ def genetic_search(img, mask):
   
     """
         # ls and pwd added to test
-    output = subprocess.Popen(f'conda run -n env; ls; pwd ;seesearch {img}{mask}')
-    print(output)
-    return output
+    #Run a popen process 
+    
+    
+    #process = subprocess.run(f'seesearch {img}{mask}', shell=True, stdout = subprocess.PIPE, stdin=
+                               #subprocess.PIPE)
+    #output = Image.open("temp_mask.png")
+#     print("See segment done running")
+#     print(process.stdout.decode('utf-8'))
+#     print(process.stderr.decode('utf-8'))
+
+    # TODO - This is a hack we need to fix GeneticSearch to allow for single channel images
+    if  len(img.shape) == 2:
+
+        ThreeChan = np.zeros([img.shape[0], img.shape[1], 3])
+        ThreeChan[:,:,0] = img;
+        ThreeChan[:,:,1] = img;
+        ThreeChan[:,:,2] = img;
+    
+    else: 
+        ThreeChan = img
+        
+    my_evolver = GeneticSearch.Evolver(ThreeChan, mask, pop_size=10)
+    population = my_evolver.run(ngen=5)
+
+    #Get the best algorithm so far
+    params = my_evolver.hof[0]
+    print('Best Individual:\n', params)
+
+    #Generate mask of best so far.
+    seg = Segmentors.algoFromParams(params)
+    best_mask = seg.evaluate(ThreeChan)
+    
+    
+    
+    return best_mask
 
 def watershed_segmentation(img, mask, sigma=4):
     """
@@ -292,7 +324,7 @@ def segmentation_generic(img, mask, mode='watershed'):
         
         im_mask = Image.fromarray(mask) #trying to convery ndarry image to actual image
         im_mask.save("mask.jpg") #this works
-        return genetic_search("img.jpg", "mask.jpg")
+        return genetic_search(img, mask)
     else:
         raise NotImplementedError
 
